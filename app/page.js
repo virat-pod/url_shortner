@@ -3,17 +3,17 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex items-center">
-      <section className="flex flex-col lg:flex-row gap-8 lg:gap-0 bg-purple-200 w-full p-8 px-2.5 items-center justify-around">
+    <main className="h-screen bg-purple-200">
+      <section className="flex h-[85%] flex-col lg:flex-row gap-12 lg:gap-0  w-full px-2.5 items-center lg:justify-around py-17">
         <div className="title flex  flex-col items-center gap-5">
-          <div className="titleText flex flex-col gap-1.5">
+          <div className="titleText flex flex-col gap-2.5">
             <h1 className="text-2xl sm:text-3xl text-center font-serif font-oswald font-extrabold">
               The best <span className="underline">URL</span> Shortner in the
               market
             </h1>
             <p className="text-zinc-700 text-xl max-w-xl lg:max-w-lg text-center">
               This is eventually best url shortner you have ever seen. this is
-              made by ViratPod who love open source. my ideal is linus
+              made by ViratPod. who love <span className="text-red-400 underline">open source</span> my ideal is linus
             </p>
           </div>
           <div className="cta flex gap-3">
