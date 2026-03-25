@@ -1,12 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { useState, useEffect, useContext } from "react";
 import { deleteUrl } from "@/lib/actions/links";
+import { ServiceContext } from "@/lib/contexts/serviceContext";
 
 const generateLink = () => {
   const [url, seturl] = useState("");
   const [shortUrl, setshortUrl] = useState("");
   const [links, setlinks] = useState([]);
+  const { showNotifications } = useContext(ServiceContext);
 
   useEffect(() => {
     getLinks();
@@ -19,7 +20,7 @@ const generateLink = () => {
       if (!res.success) return;
       setlinks(res.data);
     } catch (err) {
-      toast.error(err);
+      showNotifications(err, "error");
     }
   };
 
@@ -41,7 +42,6 @@ const generateLink = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        toast(`success: ${data.success}; report: ${data.message}`);
         data.success && setlinks((prev) => [...prev, data.data]);
       });
     reset();
@@ -50,89 +50,124 @@ const generateLink = () => {
   const DeleteLink = async (shortUrl) => {
     const deleteThat = await deleteUrl(shortUrl);
     if (deleteThat.success) {
-      toast.success("Deleted");
+      showNotifications("Deleted");
       setlinks((prev) => prev.filter((l) => l.shortUrl !== shortUrl));
     }
   };
 
   return (
     <>
-      <div className="flex flex-col justify-center px-3 items-center py-18 gap-4">
-        <div className="bitlinks flex flex-col w-full max-w-xl gap-4 bg-purple-200 p-4 rounded-lg">
-          <h1 className="font-oswald text-2xl font-medium">
-            Generate your short URLs
-          </h1>
-          <div className="make-link flex flex-col gap-2">
-            <input
-              value={url}
-              onChange={(e) => {
-                seturl(e.target.value);
-              }}
-              className="bg-white outline-purple-500 p-2 px-3 rounded-sm"
-              placeholder="enter your url"
-              type="text"
-            />
-            <input
-              value={shortUrl}
-              onChange={(e) => {
-                setshortUrl(e.target.value);
-              }}
-              className="bg-white outline-purple-500 p-2 px-3 rounded-sm"
-              placeholder="enter your preffered short URL text"
-              type="text"
-            />
+      <div className="flex flex-col justify-center px-4 items-center pt-6.5 gap-2">
+        <div className="w-full max-w-[480px] bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+          <div className="px-6 py-5 border-b border-zinc-100">
+            <h2 className="font-oswald text-xl font-semibold text-zinc-900">
+              Generate short URL
+            </h2>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Paste a long link, pick a slug
+            </p>
           </div>
-          <button
-            disabled={!shortUrl || !url}
-            onClick={() => {
-              generate();
-            }}
-            className="cursor-pointer bg-purple-500 p-2 rounded-lg text-white text-lg font-medium"
-          >
-            Generate
-          </button>
+          <div className="px-6 py-5 flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">
+                Destination URL
+              </label>
+              <input
+                value={url}
+                onChange={(e) => seturl(e.target.value)}
+                className="bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 outline-none focus:border-purple-500 focus:bg-white transition-colors placeholder:text-zinc-400"
+                placeholder="https://your-very-long-url.com/goes/here"
+                type="text"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">
+                Custom slug
+              </label>
+              <div className="flex items-center bg-zinc-50 border border-zinc-200 rounded-lg overflow-hidden focus-within:border-purple-500 focus-within:bg-white transition-colors">
+                <span className="px-3.5 py-2.5 text-xs text-zinc-400 font-mono border-r border-zinc-200 bg-zinc-100 whitespace-nowrap">
+                  url-shortiners/
+                </span>
+                <input
+                  value={shortUrl}
+                  onChange={(e) => setshortUrl(e.target.value)}
+                  className="flex-1 bg-transparent px-3.5 py-2.5 text-sm font-mono text-zinc-900 outline-none placeholder:text-zinc-400"
+                  placeholder="my-link"
+                  type="text"
+                />
+              </div>
+            </div>
+
+            <button
+              disabled={!shortUrl || !url}
+              onClick={generate}
+              className="mt-1 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed text-white font-medium text-sm py-2.5 rounded-lg transition-colors cursor-pointer"
+            >
+              Generate
+            </button>
+          </div>
         </div>
-        <div className="showResult flex flex-col w-full max-w-xl overflow-y-auto gap-3 bg-purple-100 rounded-lg p-2">
-          <h1 className="text-start text-xl font-medium">Your URL's</h1>
-          <div className="flex flex-col gap-3 overflow-y-auto max-h-[14rem] py-2">
-            {links &&
-              links.map((data, i) => {
-                return (
-                  <div
-                    key={data.shortUrl}
-                    className="allUrls flex items-center border-b border-b-purple-300 pb-2 justify-between"
-                  >
-                    <p
-                      onClick={() => {
-                        window.open(data.url, "_blank");
-                      }}
-                      className="cursor-pointer text-[0.9rem] font-mono"
-                    >{`${process.env.NEXT_PUBLIC_BASE_URL}/${data.shortUrl}`}</p>
+
+        <div className="w-full max-w-[480px] bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <h2 className="font-oswald text-lg font-semibold text-zinc-900">
+              Your URLs
+            </h2>
+            <span className="text-[11px] font-medium bg-purple-50 text-purple-600 border border-purple-100 px-2.5 py-0.5 rounded-full">
+              {links?.length || 0} links
+            </span>
+          </div>
+
+          <div className="flex flex-col max-h-56 overflow-y-auto">
+            {!links?.length ? (
+              <p className="text-center text-sm text-zinc-400 py-8">
+                No links yet — generate one above
+              </p>
+            ) : (
+              links.map((data) => (
+                <div
+                  key={data.shortUrl}
+                  className="flex items-center justify-between gap-3 px-6 py-3 border-b border-zinc-50 hover:bg-zinc-50 transition-colors last:border-none"
+                >
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span
+                      onClick={() => window.open(data.url, "_blank")}
+                      className="font-mono text-sm text-purple-600 cursor-pointer hover:underline truncate"
+                    >
+                      {`${process.env.NEXT_PUBLIC_BASE_URL}/${data.shortUrl}`}
+                    </span>
+                    <span className="text-[11px] text-zinc-400 truncate max-w-xs">
+                      {data.url}
+                    </span>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
                     <button
                       onClick={() => {
-                        DeleteLink(data.shortUrl);
+                        navigator.clipboard.writeText(
+                          `${process.env.NEXT_PUBLIC_BASE_URL}/${data.shortUrl}`,
+                        );
+                        showNotifications("Copied");
                       }}
-                      className="material-symbols-outlined !text-xl text-red-500 rounded-full cursor-pointer"
+                      className="w-7 h-7 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-500 text-xs flex items-center justify-center cursor-pointer transition-colors"
+                      title="Copy"
                     >
-                      delete
+                      ⎘
+                    </button>
+                    <button
+                      onClick={() => DeleteLink(data.shortUrl)}
+                      className="w-7 h-7 rounded-md border border-red-100 bg-white hover:bg-red-50 text-red-400 text-xs flex items-center justify-center cursor-pointer transition-colors"
+                      title="Delete"
+                    >
+                      ✕
                     </button>
                   </div>
-                );
-              })}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
     </>
   );
 };

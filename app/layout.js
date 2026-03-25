@@ -1,12 +1,13 @@
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import { ServiceProvider } from "@/lib/contexts/serviceContext";
 
 const oswald = Oswald({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'], 
-  variable: '--font-oswald', 
-})
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-oswald",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,10 +30,16 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${oswald.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          rel="stylesheet"
+        />
+      </head>
       <body className="min-h-full flex flex-col">
-        <Navbar/>
-        {children}
-        </body>
+        <Navbar />
+        <ServiceProvider>{children}</ServiceProvider>
+      </body>
     </html>
   );
 }
